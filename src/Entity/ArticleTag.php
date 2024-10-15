@@ -33,10 +33,17 @@ class ArticleTag
         return $this;
     }
 
-    public function setTag(?Tag $tag): self
+    public function getTag(): ?Tag
+    {
+        return $this->tag;
+    }
+
+    public function setTag(Tag $tag): self
     {
         $this->tag = $tag;
 
         return $this;
     }
+
+
 }
