@@ -25,4 +25,18 @@ class ArticleTag
     {
         $this->createdAt = new \DateTimeImmutable();
     }
+
+    public function setArticle(Article $article): self
+    {
+        $this->article = $article;
+
+        return $this;
+    }
+
+    public function setTag(?Tag $tag): self
+    {
+        $this->tag = $tag;
+
+        return $this;
+    }
 }

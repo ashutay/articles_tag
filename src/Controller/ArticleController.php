@@ -3,6 +3,8 @@
 namespace App\Controller;
 
 use App\Entity\Article;
+use App\Entity\ArticleTag;
+use App\Entity\Tag;
 use App\Repository\ArticleRepository;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
@@ -40,6 +42,28 @@ final class ArticleController extends AbstractController
 
         $article = new Article();
         $article->setTitle($data['title']);
+
+        if (isset($data['tags'])) {
+            if (!is_array($data['tags'])) {
+                return new JsonResponse(['message' => 'The tags field is not array'], Response::HTTP_BAD_REQUEST);
+            }
+
+            foreach ($data['tags'] as $tagName) {
+                $tag = $entityManager->getRepository(Tag::class)->findOneBy(['name' => $tagName]);
+
+                if (!$tag) {
+                    $tag = new Tag();
+                    $tag->setName($tagName);
+                    $entityManager->persist($tag);
+                }
+
+                $articleTag = new ArticleTag();
+                $articleTag->setArticle($article);
+                $articleTag->setTag($tag);
+
+                $article->addArticleTag($articleTag);
+            }
+        }
 
         $errors = $validator->validate($article);
 

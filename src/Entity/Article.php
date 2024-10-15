@@ -23,7 +23,7 @@ class Article
     /**
      * @var Collection<int, Tag>
      */
-    #[ORM\OneToMany(targetEntity: ArticleTag::class, mappedBy: 'article', cascade: ['remove'])]
+    #[ORM\OneToMany(targetEntity: ArticleTag::class, mappedBy: 'article', cascade: ['persist', 'remove'])]
     private Collection $articleTags;
 
 
@@ -45,6 +45,16 @@ class Article
     public function setTitle(string $title): static
     {
         $this->title = $title;
+
+        return $this;
+    }
+
+    public function addArticleTag(ArticleTag $articleTag): static
+    {
+        if (!$this->articleTags->contains($articleTag)) {
+            $this->articleTags[] = $articleTag;
+            $articleTag->setArticle($this);
+        }
 
         return $this;
     }
