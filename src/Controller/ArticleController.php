@@ -135,6 +135,7 @@ final class ArticleController extends AbstractController
         }
 
         $article->setTitle($data['title']);
+
         $errors = $validator->validate($article);
 
         if (count($errors) > 0) {
@@ -144,6 +145,53 @@ final class ArticleController extends AbstractController
             }
 
             return new JsonResponse(['errors' => $errorMessages], Response::HTTP_BAD_REQUEST);
+        }
+
+        if (isset($data['tags'])) {
+            if (!is_array($data['tags'])) {
+                return new JsonResponse(['message' => 'The tags field is not array'], Response::HTTP_BAD_REQUEST);
+            }
+
+            $newTags = [];
+            foreach ($data['tags'] as $tagName) {
+                $tag = $entityManager->getRepository(Tag::class)->findOneBy(['name' => $tagName]);
+
+                if (!$tag) {
+                    $tag = new Tag();
+                    $tag->setName($tagName);
+                    $entityManager->persist($tag);
+                }
+
+                $newTags[] = $tag;
+            }
+
+            $entityManager->flush();
+
+            $newTagsMap = [];
+            foreach ($newTags as $tag) {
+                $newTagsMap[$tag->getId()] = $tag;
+            }
+
+            $currentTagsMap = [];
+            foreach ($article->getArticleTags() as $articleTag) {
+                $currentTagId = $articleTag->getTag()->getId();
+
+                if (!isset($newTagsMap[$currentTagId])) {
+                    $article->removeArticleTag($articleTag);
+                    $entityManager->remove($articleTag);
+                } else {
+                    $currentTagsMap[$currentTagId] = $articleTag;
+                }
+            }
+
+            foreach ($newTags as $tag) {
+                if (!isset($currentTagsMap[$tag->getId()])) {
+                    $articleTag = new ArticleTag();
+                    $articleTag->setArticle($article);
+                    $articleTag->setTag($tag);
+                    $entityManager->persist($articleTag);
+                }
+            }
         }
 
         $entityManager->flush();
