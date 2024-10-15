@@ -25,7 +25,7 @@ final class ArticleController extends AbstractController
         $data = [];
 
         foreach ($articles as $article) {
-            $articleData = ['id' => $article->getId(), 'title' => $article->getTitle()];
+            $articleData = ['id' => $article->getId(), 'title' => $article->getTitle(), 'tags' => []];
 
             foreach ($article->getArticleTags() as $articleTag) {
                 $articleData['tags'][] = $articleTag->getTag()->getName();
@@ -105,7 +105,12 @@ final class ArticleController extends AbstractController
         $data = [
             'id' => $article->getId(),
             'title' => $article->getTitle(),
+            'tags' => []
         ];
+
+        foreach ($article->getArticleTags() as $articleTag) {
+            $data['tags'][] = $articleTag->getTag()->getName();
+        }
 
         return new JsonResponse($data, Response::HTTP_OK);
     }
