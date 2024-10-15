@@ -6,7 +6,7 @@ use App\Repository\ArticleRepository;
 use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Collection;
 use Doctrine\ORM\Mapping as ORM;
-use phpDocumentor\Reflection\Types\Integer;
+use Symfony\Component\Validator\Constraints as Assert;
 
 #[ORM\Entity(repositoryClass: ArticleRepository::class)]
 class Article
@@ -16,13 +16,14 @@ class Article
     #[ORM\Column]
     private int $id;
 
-    #[ORM\Column(length: 255)]
+    #[ORM\Column(length: 255, nullable: false)]
+    #[Assert\NotBlank(message: "The title cannot be blank.")]
     private string $title;
 
     /**
      * @var Collection<int, Tag>
      */
-    #[ORM\OneToMany(targetEntity: ArticleTag::class, mappedBy: 'article', cascade: ['persist', 'remove'])]
+    #[ORM\OneToMany(targetEntity: ArticleTag::class, mappedBy: 'article', cascade: ['remove'])]
     private Collection $articleTags;
 
 
