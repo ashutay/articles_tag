@@ -23,7 +23,7 @@ class Article
     /**
      * @var Collection<int, Tag>
      */
-    #[ORM\OneToMany(targetEntity: ArticleTag::class, mappedBy: 'article', cascade: ['persist', 'remove'])]
+    #[ORM\OneToMany(targetEntity: ArticleTag::class, mappedBy: 'article', cascade: ['persist', 'remove'], orphanRemoval: true)]
     private Collection $articleTags;
 
 
@@ -55,6 +55,13 @@ class Article
             $this->articleTags[] = $articleTag;
             $articleTag->setArticle($this);
         }
+
+        return $this;
+    }
+
+    public function removeArticleTag(ArticleTag $articleTag): self
+    {
+        $this->articleTags->removeElement($articleTag);
 
         return $this;
     }
