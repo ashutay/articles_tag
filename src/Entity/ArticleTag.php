@@ -6,6 +6,7 @@ use App\Repository\ArticleTagRepository;
 use Doctrine\ORM\Mapping as ORM;
 
 #[ORM\Entity(repositoryClass: ArticleTagRepository::class)]
+#[ORM\Table(name: "article_tag")]
 class ArticleTag
 {
     #[ORM\Id]

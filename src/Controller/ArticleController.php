@@ -19,9 +19,15 @@ use Symfony\Component\Validator\Validator\ValidatorInterface;
 final class ArticleController extends AbstractController
 {
     #[Route(name: 'app_article_index', methods: ['GET'])]
-    public function index(ArticleRepository $articleRepository): JsonResponse
+    public function index(ArticleRepository $articleRepository, Request $request): JsonResponse
     {
-        $articles = $articleRepository->findAll();
+        $filter = $request->query->all();
+        if (!empty($filter['tags'])) {
+            $articles = $articleRepository->findByTags($filter['tags']);
+        } else {
+            $articles = $articleRepository->findAll();
+        }
+
         $data = [];
 
         foreach ($articles as $article) {

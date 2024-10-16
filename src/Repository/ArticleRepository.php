@@ -3,6 +3,7 @@
 namespace App\Repository;
 
 use App\Entity\Article;
+use App\Entity\ArticleTag;
 use Doctrine\Bundle\DoctrineBundle\Repository\ServiceEntityRepository;
 use Doctrine\Persistence\ManagerRegistry;
 
@@ -14,6 +15,20 @@ class ArticleRepository extends ServiceEntityRepository
     public function __construct(ManagerRegistry $registry)
     {
         parent::__construct($registry, Article::class);
+    }
+
+    public function findByTags(array $tagNames)
+    {
+        $qb = $this->createQueryBuilder('a')
+            ->innerJoin(ArticleTag::class, 'at', 'WITH', 'at.article = a.id')
+            ->innerJoin('at.tag', 't', 'WITH', 't.id = at.tag')
+            ->where('t.name IN (:tagNames)')
+            ->groupBy('a.id')
+            ->having('COUNT(t.id) = :tagCount')
+            ->setParameter('tagNames', $tagNames)
+            ->setParameter('tagCount', count($tagNames));
+
+        return $qb->getQuery()->getResult();
     }
 
     //    /**
