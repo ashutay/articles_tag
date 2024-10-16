@@ -21,7 +21,7 @@ class Tag
     /**
      * @var Collection<int, Article>
      */
-    #[ORM\OneToMany(targetEntity: ArticleTag::class, mappedBy: 'tag', cascade: ['persist', 'remove'])]
+    #[ORM\OneToMany(targetEntity: ArticleTag::class, mappedBy: 'tag', cascade: ['persist', 'remove'], orphanRemoval: true)]
     private Collection $articleTags;
 
     public function __construct()

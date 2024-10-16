@@ -30,12 +30,16 @@ final class TagController extends AbstractController
     }
 
     #[Route('/create', name: 'app_tag_new', methods: ['POST'])]
-    public function create(Request $request, EntityManagerInterface $entityManager, ValidatorInterface $validator): JsonResponse
+    public function create(Request $request, EntityManagerInterface $entityManager, ValidatorInterface $validator, TagRepository $tagRepository): JsonResponse
     {
         $data = json_decode($request->getContent(), true);
 
         if (!isset($data['name'])) {
             return new JsonResponse(['message' => 'The name field is required'], Response::HTTP_BAD_REQUEST);
+        }
+
+        if ($tagRepository->findOneBy(['name' => $data['name']])) {
+            return new JsonResponse(['message' => 'Tag with this name already exists'], Response::HTTP_CONFLICT);
         }
 
         $tag = new Tag();
