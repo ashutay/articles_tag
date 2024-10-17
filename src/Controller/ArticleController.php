@@ -7,18 +7,55 @@ use App\Entity\ArticleTag;
 use App\Entity\Tag;
 use App\Repository\ArticleRepository;
 use Doctrine\ORM\EntityManagerInterface;
+use Nelmio\ApiDocBundle\Annotation\Model;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Attribute\Route;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\Validator\Validator\ValidatorInterface;
-
+use OpenApi\Attributes as OA;
 
 #[Route('/api/articles')]
 final class ArticleController extends AbstractController
 {
     #[Route(name: 'app_article_index', methods: ['GET'])]
+    #[OA\Response(
+        response: 200,
+        description: 'Returns a list of articles with tags',
+        content: new OA\JsonContent(
+            type: 'array',
+            items: new OA\Items(ref: new Model(type: Article::class)),
+            example: '[
+            {
+    "id": 0,
+    "title": "string",
+    "tags": [
+      {
+        "tag": "string"
+      }
+    ]
+  }, 
+  {
+    "id": 0,
+    "title": "string",
+    "tags": [
+      {
+        "tag": "string"
+      }
+    ]
+  }]'
+        )
+    )]
+    #[OA\Parameter(
+        name: 'tags',
+        in: 'query',
+        description: 'Array of tags to filters',
+        schema: new OA\Schema(
+            type: 'array',
+            items: new OA\Items(ref: new Model(type: Tag::class))),
+        example: 'GET ?tags[]=PHP&tags[]=Nuxt'
+    )]
     public function index(ArticleRepository $articleRepository, Request $request): JsonResponse
     {
         $filter = $request->query->all();
@@ -44,6 +81,26 @@ final class ArticleController extends AbstractController
     }
 
     #[Route('/create', name: 'app_article_new', methods: ['POST'])]
+    #[OA\Response(
+        response: 200,
+        description: 'Article created',
+        content: new OA\JsonContent(
+            type: 'array',
+            items: new OA\Items(ref: new Model(type: Article::class)),
+            example: '{
+    "message": "Article created",
+    "id": 10
+}'
+        )
+    )]
+    #[OA\RequestBody(
+        content: new OA\JsonContent(type: "object",
+            example:'{
+          "title": "My New Article",
+          "tags": ["PHP", "Symfony", "API", "Laravel"]
+        }'
+        )
+    )]
     public function create(Request $request, EntityManagerInterface $entityManager, ValidatorInterface $validator): JsonResponse
     {
         $data = json_decode($request->getContent(), true);
